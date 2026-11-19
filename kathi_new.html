@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300;1,9..144,500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #1b1033;
+    --plum: #2e1a4f;
+    --rose: #ff8fb1;
+    --peach: #ffc9a8;
+    --lilac: #c9b6ff;
+    --text: #fff4f7;
+    --muted: #cdbfe6;
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "DM Sans", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    background: var(--night);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* soft drifting glow behind everything */
+  .glow { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--night); }
+  .glow span { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; animation: drift 22s ease-in-out infinite alternate; }
+  .glow span:nth-child(1) { width: 55vmax; height: 55vmax; background: #7a3cff; top: -15%; left: -15%; }
+  .glow span:nth-child(2) { width: 45vmax; height: 45vmax; background: #ff6f9f; bottom: -20%; right: -10%; animation-delay: -8s; }
+  .glow span:nth-child(3) { width: 30vmax; height: 30vmax; background: #ffb37a; top: 40%; left: 45%; opacity: .3; animation-delay: -14s; }
+  @keyframes drift { to { transform: translate(8vmax, 6vmax) scale(1.15); } }
+
+  section { max-width: 920px; margin: 0 auto; padding: 96px 24px; }
+
+  /* hero */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .hero small { color: var(--muted); font-size: 1.05rem; opacity: 0; animation: rise 1.2s .2s forwards; }
+  .hero h1 {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: clamp(3.4rem, 15vw, 9rem); line-height: 1; margin: 12px 0 20px;
+    background: linear-gradient(100deg, var(--peach), var(--rose) 50%, var(--lilac));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    opacity: 0; animation: rise 1.6s .7s forwards;
+  }
+  .hero p { max-width: 34ch; color: var(--muted); font-size: 1.15rem; opacity: 0; animation: rise 1.2s 1.6s forwards; }
+  .scroll { margin-top: 48px; color: var(--rose); font-size: 1.6rem; opacity: 0; animation: rise 1s 2.4s forwards, bob 2.4s 3.4s ease-in-out infinite; text-decoration: none; }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  @keyframes bob { 50% { transform: translateY(8px); } }
+
+  h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.15; margin-bottom: 12px; }
+  .lead { color: var(--muted); max-width: 46ch; margin-bottom: 40px; }
+
+  /* traits */
+  .traits { display: flex; flex-wrap: wrap; gap: 14px; }
+  .trait {
+    font: 500 1.05rem var(--sans); color: var(--text); cursor: pointer;
+    padding: 14px 26px; border-radius: 999px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22);
+    backdrop-filter: blur(8px); transition: background .25s, transform .25s, border-color .25s;
+  }
+  .trait:hover { background: rgba(255,143,177,.22); transform: translateY(-2px); }
+  .trait[aria-pressed="true"] { background: linear-gradient(120deg, var(--rose), var(--peach)); color: #3a1230; border-color: transparent; }
+  .trait:focus-visible, .heart-btn:focus-visible { outline: 3px solid var(--lilac); outline-offset: 3px; }
+
+  .result {
+    margin-top: 36px; padding: 36px 28px; border-radius: 28px; min-height: 210px;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(14px); text-align: center;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+  }
+  .result .hint { color: var(--muted); font-family: var(--serif); font-style: italic; font-size: 1.3rem; }
+  .score { font-family: var(--serif); font-weight: 500; font-size: clamp(2.6rem, 11vw, 5.4rem); line-height: 1.05; color: var(--rose); animation: pop .6s cubic-bezier(.2,1.4,.4,1); word-break: break-word; }
+  .score sub { font-size: .35em; color: var(--muted); vertical-align: baseline; margin-left: 6px; }
+  .why { margin-top: 14px; max-width: 42ch; color: var(--text); font-size: 1.1rem; animation: rise .8s .15s both; }
+  @keyframes pop { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+
+  /* gallery */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; margin-top: 40px; }
+  figure { background: #fff7f9; padding: 12px 12px 18px; border-radius: 6px; box-shadow: 0 18px 40px rgba(10,0,30,.45); transition: transform .35s; }
+  figure:nth-child(odd) { transform: rotate(-2deg); }
+  figure:nth-child(even) { transform: rotate(1.8deg); }
+  figure:hover { transform: rotate(0) scale(1.03); }
+  .frame { aspect-ratio: 4 / 5; border-radius: 3px; overflow: hidden; position: relative;
+    background: linear-gradient(135deg, #ffd1e0, #d9c8ff); display: grid; place-items: center; text-align: center; color: #6a3a6a; font-size: .9rem; padding: 16px; }
+  .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  figcaption { font-family: var(--serif); font-style: italic; color: #4a2a4f; text-align: center; margin-top: 12px; }
+
+  /* closing */
+  .closing { text-align: center; }
+  .closing p { font-family: var(--serif); font-size: clamp(1.25rem, 3.6vw, 1.7rem); font-weight: 300; max-width: 30ch; margin: 0 auto 36px; line-height: 1.5; }
+  .heart-btn { font: 500 1.05rem var(--sans); color: #3a1230; background: linear-gradient(120deg, var(--rose), var(--peach)); border: 0; padding: 16px 34px; border-radius: 999px; cursor: pointer; transition: transform .2s; }
+  .heart-btn:hover { transform: scale(1.05); }
+  .final { margin-top: 28px; min-height: 2em; color: var(--peach); font-family: var(--serif); font-style: italic; font-size: 1.4rem; }
+
+  .float { position: fixed; bottom: -40px; pointer-events: none; animation: up 3.4s ease-out forwards; z-index: 5; }
+  @keyframes up { to { transform: translateY(-110vh) rotate(25deg); opacity: 0; } }
+
+  footer { text-align: center; color: var(--muted); font-size: .9rem; padding: 0 24px 48px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    .hero small, .hero h1, .hero p, .scroll { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="glow" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<section class="hero">
+  <small id="intro">I made something for you</small>
+  <h1 id="name">Her Name</h1>
+  <p>Jus to remind you of your awesomeoness</p>
+  <a class="scroll" href="#traits" aria-label="Scroll down">&#8595;</a>
+</section>
+
+<section id="traits">
+  <h2>Things I love about you</h2>
+  <p class="lead">Tap each one to see how you score. Fair warning: the scale is broken, because you broke it.</p>
+  <div class="traits" id="traitList"></div>
+  <div class="result" id="result" aria-live="polite">
+    <p class="hint">Pick one &#8593;</p>
+  </div>
+</section>
+
+<section id="photos">
+  <h2>My favouriteee person 💋</h2>
+  <p class="lead">MWAHHHHHH</p>
+  <div class="gallery" id="gallery"></div>
+</section>
+
+<section class="closing">
+  <h2>One last thing</h2>
+  <p id="closingText">I’m really greatful to be loved by you 🥹 </p>
+  <button class="heart-btn" id="heartBtn">Click me</button>
+  <div class="final" id="final" aria-live="polite"></div>
+</section>
+
+<footer>Made with love, just for you, by yours truly</footer>
+
+<script>
+  /* ============ EDIT THIS PART ============ */
+  const HER_NAME = "KATHHII";          // her name
+  const INTRO = "Da GOAT";
+
+  // score = what's shown, why = the sweet line under it
+  const TRAITS = [
+    { label: "Beauty",       score: "a googol", why: "a 1 with 100 zeros, because you are just astonishing" },
+    { label: "Kindness",         score: "100,000,000,000",  why: "I mean still aint not enough for how kind of a soul you are" },
+    { label: "Your Personality",         score: "a zillion", why: "Not a real number, but neither are you because u r unreal" },
+    { label: "Sweetness",        score: "∞",         why: "Sometimes i lowkey get scared that i would get diabetes after biting u" },
+    { label: "Your smile",   score: "10⁹⁹⁹",    why: "It fixes my whole mood in about a second (my favourite feature of urs btw)" },
+    { label: "U", score: "off the charts", why: "I mean everything of urs is irresistably loveable and out of this world so i would just sum it up" }
+  ];
+
+  // put her photos in a folder called "photos" next to index.html
+  const PHOTOS = [
+    { src: "photos/1.jpg", caption: "That smileeee😍" },
+    { src: "photos/2.jpg", caption: "Pure sunshine" },
+    { src: "photos/3.jpg", caption: "So pretttyyy" }
+  ];
+
+  const CLOSING = "I’m really lucky I get to be yours.";
+  const FINAL_MESSAGE = "You deserve every good thing, and the whole worldd♥";
+  /* ========================================= */
+
+  document.title = "For " + HER_NAME;
+  document.getElementById("name").textContent = HER_NAME;
+  document.getElementById("intro").textContent = INTRO;
+  document.getElementById("closingText").textContent = CLOSING;
+
+  // traits
+  const list = document.getElementById("traitList");
+  const result = document.getElementById("result");
+  TRAITS.forEach((t, i) => {
+    const b = document.createElement("button");
+    b.className = "trait"; b.textContent = t.label; b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => {
+      list.querySelectorAll(".trait").forEach(x => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      result.innerHTML = "";
+      const s = document.createElement("div"); s.className = "score";
+      s.innerHTML = t.score + "<sub>/ 10</sub>";
+      const w = document.createElement("p"); w.className = "why"; w.textContent = t.why;
+      result.append(s, w);
+      burst(5);
+    });
+    list.appendChild(b);
+  });
+
+  // gallery (shows a pretty placeholder until the photo exists)
+  const gallery = document.getElementById("gallery");
+  PHOTOS.forEach(p => {
+    const f = document.createElement("figure");
+    const frame = document.createElement("div"); frame.className = "frame";
+    frame.textContent = "Add your photo: " + p.src;
+    const img = new Image(); img.alt = p.caption; img.src = p.src;
+    img.onload = () => { frame.textContent = ""; frame.appendChild(img); };
+    const c = document.createElement("figcaption"); c.textContent = p.caption;
+    f.append(frame, c); gallery.appendChild(f);
+  });
+
+  // floating hearts
+  function burst(n) {
+    for (let i = 0; i < n; i++) {
+      const h = document.createElement("span");
+      h.className = "float"; h.textContent = ["♥", "✨", "💗", "💖"][Math.floor(Math.random() * 4)];
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.fontSize = 18 + Math.random() * 26 + "px";
+      h.style.animationDelay = Math.random() * .5 + "s";
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 4200);
+    }
+  }
+  document.getElementById("heartBtn").addEventListener("click", () => {
+    document.getElementById("final").textContent = FINAL_MESSAGE;
+    burst(30);
+  });
+</script>
+</body>
+</html>
